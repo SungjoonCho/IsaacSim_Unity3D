@@ -113,7 +113,7 @@ terminal 2 - $ rviz
   Drag the color camera script and depth camera script to the camera. You can edit intrinsic, extrinsic parameter in the inspector.
   
   <p align="center">
-    <img width="800" height="500" src="https://user-images.githubusercontent.com/80872528/127105690-9d018204-443a-44ec-8a5e-bf9ff7c64ec8.png">
+    <img width="200" height="500" src="https://user-images.githubusercontent.com/80872528/127105690-9d018204-443a-44ec-8a5e-bf9ff7c64ec8.png">
   </p>
 
 
