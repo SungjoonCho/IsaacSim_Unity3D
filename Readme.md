@@ -91,14 +91,44 @@ I used above assets.
 ## Execute
 
 Run simulation in Unity 3D.
-
+<pre>
 terminal 1 - (isaac1) ~/isaac_sim_unity3d/isaac/sdk$ bazel run //apps/tutorials/multisensor_unity3d:multisensor_unity3d 
-
 terminal 2 - $ rviz
-
+</pre>
 <p align="center">
   <img width="800" height="500" src="https://user-images.githubusercontent.com/80872528/127104830-4692edbf-c08b-453f-93a7-c5bf77b0be49.png">
 </p>
 
 
-## 
+## Sensor description
+
+* 카메라 가져오기
+
+  GameObject > Camera
+
+* 카메라에 센서 스크립트 붙이기
+
+  There are color camera and depth camera scripts in Packages/com.nvidia.isaac_sim_core/Scripts/Runtime/Sensor/.
+  
+  Drag the color camera script and depth camera script to the camera. You can edit intrinsic, extrinsic parameter in the inspector.
+  
+  <p align="center">
+    <img width="800" height="500" src="https://user-images.githubusercontent.com/80872528/127105690-9d018204-443a-44ec-8a5e-bf9ff7c64ec8.png">
+  </p>
+
+
+여기서부터 이어서 쓰기
+
+* Isaac Sim과 unity simulation 연결
+
+  multisensor_unity3d.app.json helps isaac and simulation be connected.
+
+  * Sight와 연결
+  
+  * ROS와 연결
+
+
+
+
+
+
