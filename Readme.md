@@ -68,7 +68,7 @@
     
     <pre>
     bob@desktop:~/isaac/engine/$ ./engine/build/scripts/install_dependencies.sh
-    </pre>
+    </pre>Creating scene and packages
 
   * Unity 2019.03.0f6 설치 (Unity Editor 모드)
 
@@ -80,61 +80,54 @@
     
     * 위와 같은 버전 링크는 [https://unity3d.com/get-unity/download/archive]에서 원하는 버전의 "Unity Hub" 우클릭 후 "copy link address" 클릭하여 얻을 수 있음
     
-* 기타 준비 사항
+    
+* Publishing RGBD image with ROS 준비 사항
   
-  * MultiSensor_Simulation/multisensor_unity3d 다운로드 후 
+  * /isaac_sim_unity3d/isaac/sdk/apps/tutorials/에 MultiSensor_Simulation/multisensor_unity3d (업로드 된 폴더) 다운로드
+  * /isaac_sim_unity3d/isaac/sdk/packages/ros_bridge/components에 MultiSensor_Simulation/DepthToRos.cpp, hpp (업로드 된 파일) 다운로드
 
 
-
-
-
-
-
-
-    
-    
-## Other preparations
-
-* Download multisensor_unity3d directory from my github and add in /isaac_sim_unity3d/isaac/sdk/apps/tutorials/
-
-* Download DepthToRos.cpp, hpp from my github and add in /isaac_sim_unity3d/isaac/sdk/packages/ros_bridge/components.
-
-* Download camera_to_ros.subgraph.json from my github and replace with /isaac_sim_unity3d/isaac/sdk/packages/ros_bridge/apps/camera_to_ros.subgraph.json.
-
-## Creating scene and packages
+## Scene, Project 구성
 
 <pre>
 ~/isaac_sim_unity3d$ mkdir projects/test
 ~/isaac_sim_unity3d$ cp -r projects/sample/Assets projects/sample/Packages projects/sample/ProjectSettings projects/test/
 </pre>
 
-Download rgbdROS.unity.meta from my github and add in /isaac_sim_unity3d/projects/test/Assets. 
+ 1. /isaac_sim_unity3d/projects/test/Assets 에 rgbdROS.unity, rgbdROS.unity.meta (업로드 된 파일) 다운로드
+ 2. project 열기
+   <pre>
+   ~/isaac_sim_unity3d$ ~/Unity/Hub/Editor/2019.3.0f6/Editor/Unity -projectPath projects/test -logfile
+   </pre>
+   
+ 3. File - Open Scene - /isaac_sim_unity3d/projects/test/Assets/rgbdROS.unity 클릭
+ 
+ 4. [Asset 다운로드](https://youtu.be/GFcA9U45poQ)
 
-rgbdROS.unity.meta is scene that I made. 
+    아래의 Asset 사용 (모두 Download 후 Unity 내에서 import)
 
-Open the project
+    <p align="center">
+      <img width="600" height="500" src="https://user-images.githubusercontent.com/80872528/127104398-7bef679c-a172-41ca-99a3-d9367e362da6.png">
+    </p>
+
+## 실행
+
+1. Unity3D에서 Scene 열고 시뮬레이션 시작
+2. Applicaiton 실행
+
 <pre>
-~/isaac_sim_unity3d$ ~/Unity/Hub/Editor/2019.3.0f6/Editor/Unity -projectPath projects/test -logfile
-</pre>
-
-[You have to download and import additional asset from asset store.](https://youtu.be/GFcA9U45poQ)
-
-<p align="center">
-  <img width="800" height="500" src="https://user-images.githubusercontent.com/80872528/127104398-7bef679c-a172-41ca-99a3-d9367e362da6.png">
-</p>
-
-I used above assets.
-
-## Execute
-
-Run simulation in Unity 3D.
-<pre>
-terminal 1 - (isaac1) ~/isaac_sim_unity3d/isaac/sdk$ bazel run //apps/tutorials/multisensor_unity3d:multisensor_unity3d 
+terminal 1 - (isaac_test) ~/isaac_sim_unity3d/isaac/sdk$ bazel run //apps/tutorials/multisensor_unity3d:multisensor_unity3d 
 terminal 2 - $ rviz
 </pre>
+
 <p align="center">
   <img width="800" height="500" src="https://user-images.githubusercontent.com/80872528/127104830-4692edbf-c08b-453f-93a7-c5bf77b0be49.png">
 </p>
+
+
+
+
+
 
 
 ## Sensor description
