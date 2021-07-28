@@ -130,33 +130,238 @@ terminal 2 - $ rviz
 
 
 
-## Sensor description
+## Sensor description (Unity 3D)
+(카메라 기존 2개보다 추가시 참고)
 
 * 카메라 가져오기
 
-  GameObject > Camera
+  [Menu] GameObject > Camera
 
 * 카메라에 센서 스크립트 붙이기
 
-  There are color camera and depth camera scripts in Packages/com.nvidia.isaac_sim_core/Scripts/Runtime/Sensor/.
-  
-  Drag the color camera script and depth camera script to the camera. You can edit intrinsic, extrinsic parameter in the inspector.
-  
+  * Color, depth camera scripts 위치 : Packages/com.nvidia.isaac_sim_core/Scripts/Runtime/Sensor/.
+  * 두 스트립트를 카메라에 드래그(color, depth 순서로)
+  * 카메라 클릭하면 나오는 inspector에서 intrinsic, extrinsic parameter 수정 가능 (본인은 [Realsense D435i](https://www.intelrealsense.com/depth-camera-d435i/) 스펙에 맞춤)
+
   <p align="center">
     <img width="200" height="500" src="https://user-images.githubusercontent.com/80872528/127105690-9d018204-443a-44ec-8a5e-bf9ff7c64ec8.png">
   </p>
 
-
-여기서부터 이어서 쓰기
-
 * Isaac Sim과 unity simulation 연결
 
-  multisensor_unity3d.app.json helps isaac and simulation be connected.
+## [Scene description](https://docs.nvidia.com/isaac/isaac/doc/simulation/unity3d.html) (Unity 3D)
+(새로 project, scene 구성할 때 참고)
 
-  * Sight와 연결
-  
-  * ROS와 연결
+* isaac sdk와 Unity를 연결하려면 [isaac.alice, isaac.minisight를 scene에 드래그](https://docs.nvidia.com/isaac/isaac/doc/simulation/unity3d.html#add-carter-and-isaac-applications) (NVIDIA IsaacSim for Unity3D(Core) > Prefabs에 위치)
 
+## Application description - multisensor_unity3d.app.json (Isaac)
+   * Isaac sdk에서는 json 형식을 이용해 전체 연결 시스템을 구성하며 그래프로 구성해야 한다. 크게 node, edge, Config로 이루어져 있다. 
+   * [일반적으로 Unity Simulation과 Sight(Viewer) 및 기타 동작들을 연결시켜주는데 이용된다](https://docs.nvidia.com/isaac/isaac/doc/tutorials/building_apps.html?highlight=edge%20detection#processing-input-from-simulation) 
+   * multisensor_unity3d.app.json 파일은 Isaac sdk로서 Unity simulation과 ROS를 이어주는 중간 매개체 역할을 해준다. 
+   * Json 파일 구성시에는 동일 디렉토리 내에 BUILD 파일도 있어야 한다.
+
+   * BUILD 파일
+   
+     <pre>
+     name = "multisensor_unity3d" 
+     </pre>
+     
+     name은 application의 명칭
+     
+     <pre>
+     data = [
+          "//packages/navsim/apps:navsim_navigation_subgraph"
+     ]
+     </pre>
+    
+     data에는 어떤 subgraph가 들어가는지 표기한다. 외부에 있는 다른 json 형식 파일을 가져올 때 subgraph로 지정하며 path도 함께 표기해줘야 한다.
+     
+     subgraph를 함수라고 생각해도 되며 반복적으로 쓰이는 부분만 외부 json 파일로 저장 후 갖다 쓰는 방식으로 써도 된다.
+     
+     <pre>
+     modules = [
+               "rgbd_processing",
+                      "sight",
+                      "viewers",
+               "ros_bridge",
+               "behavior_tree"
+     ]
+      </pre>
+      
+      modules에는 json 파일 구성에 있어서 필요한 외부 cpp, hpp 패키지 이름을 쓴다. 
+      
+      /isaac_sim_unity3d/isaac/sdk/packages/에 Isaac SDK 설치시 내장된 모듈들을 볼 수 있다.
+      
+  * multisensor_unity3d.app.json
+
+    * name과 modules은 BUILD 파일과 동일하게 써준다.
+    
+    * simulation
+      
+      BUILD 파일에서 명시한 simulation subgraph를 써준다. simulation에서 출력되는 camera frame들을 다른 node로 이동시킬 수 있다.
+      
+      ```json
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+      }
+      ```
+      
+    * camera_viewer 1, 2
+      
+      ```json
+      { 
+        "name": "camera_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ImageViewer",
+            "type": "isaac::viewers::ImageViewer"
+          },
+          {
+            "name": "DepthViewer",
+            "type": "isaac::viewers::DepthCameraViewer"
+          }          
+        ]
+      }
+      ```
+      
+      name에는 이 json 파일에서 해당 노드를 어떻게 부를건지 써주면 되고, components에는 이 노드가 무엇들로 구성되어 있는지 써준다.
+      
+      서로 다른 패키지에 있는 component를 이렇게 하나의 노드로 묶을 수 있다.
+      
+      simulation 카메라가 촬영하는 영상을 localhost로 열리는 웹페이지(Sight)에서 보여주는 역할을 한다.
+      
+      Scene에서 두 개의 카메라를 이용했기 때문에 Sight의 camera viewer 노드도 총 2개 만들었다.
+      
+    * point cloud
+    
+      ```json
+      {
+        "name": "point_cloud",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "depth_to_pointcloud",
+            "type": "isaac::rgbd_processing::DepthImageToPointCloud"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::PointCloudViewer"
+          }
+        ]
+      }
+      ```
+      
+      Simulation에서 출력되는 depth image를 Sight에서 point cloud로 볼 수 있게 해준다.
+      
+    * ros converter
+      ```json
+      {
+        "name": "ros_converters",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ImageToRos",
+            "type": "isaac::ros_bridge::ImageToRos"
+          },
+          {
+            "name": "DepthToRos",
+            "type": "isaac::ros_bridge::DepthToRos"
+          },
+          {
+            "name": "CameraIntrinsicsToRos_color",
+            "type": "isaac::ros_bridge::CameraIntrinsicsToRos"
+          },
+          {
+            "name": "ImageToRos2",
+            "type": "isaac::ros_bridge::ImageToRos"
+          },
+          {
+            "name": "DepthToRos2",
+            "type": "isaac::ros_bridge::DepthToRos"
+          },
+          {
+            "name": "CameraIntrinsicsToRos_depth",
+            "type": "isaac::ros_bridge::CameraIntrinsicsToRos"
+          }
+        ],
+        "disable_automatic_start": true
+      }
+      ```
+      
+      Simulation 카메라에서 출력되는 rgb, depth 영상을 ros로 publish 할 수 있게 해준다.
+   
+    * Edge
+   
+      ```json
+      {
+        "source": "simulation.interface/output/depth",
+        "target": "camera_viewer/DepthViewer/depth"
+      },
+      {
+        "source": "simulation.interface/output/depth_intrinsics",
+        "target": "camera_viewer/DepthViewer/intrinsics"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "camera_viewer/ImageViewer/image"
+      }
+      ```
+      simulation rgb frame <-> sight edge
+      
+      ex) target : "camera_viewer/DepthViewer/depth" ==> camera_viewer 노드의 DepthViewer의 depth proto로 보낸다 
+      
+      ```json
+      {
+        "source": "simulation.interface/output/depth",
+        "target": "point_cloud/depth_to_pointcloud/depth"
+      },
+      {
+        "source": "simulation.interface/output/depth_intrinsics",
+        "target": "point_cloud/depth_to_pointcloud/intrinsics"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "point_cloud/depth_to_pointcloud/color"
+      },
+      {
+        "source": "point_cloud/depth_to_pointcloud/cloud",
+        "target": "point_cloud/viewer/cloud"
+      }
+      ```
+      
+      Simulation의 depth frame을 pointcloud로 만들어주고 viewr로 전송
+      
+      ```json
+      {
+        "source": "simulation.interface/output/color",
+        "target": "ros_converters/ImageToRos/proto"
+      },
+      {
+        "source": "simulation.interface/output/depth",
+        "target": "ros_converters/DepthToRos/proto"
+      },
+      {
+        "source": "simulation.interface/output/intrinsics",
+        "target": "ros_converters/CameraIntrinsicsToRos_color/proto"
+      }
+      ```
+      
+      Simulation의 rgb, depth image를 ros converter로 전송하면 ros converter가 자동으로 publish
+
+      각 카메라의 rgb frame, depth frame 모두 ros topic이 다르기 때문에 ros converters 내에서도 componet 이름을 다르게 해줘야 한다.
+      
+    * Config
 
 
 
