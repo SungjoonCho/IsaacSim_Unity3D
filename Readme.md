@@ -144,7 +144,7 @@ terminal 2 - $ rviz
   * 카메라 클릭하면 나오는 inspector에서 intrinsic, extrinsic parameter 수정 가능 (본인은 [Realsense D435i](https://www.intelrealsense.com/depth-camera-d435i/) 스펙에 맞춤)
 
   <p align="center">
-    <img width="200" height="500" src="https://user-images.githubusercontent.com/80872528/127105690-9d018204-443a-44ec-8a5e-bf9ff7c64ec8.png">
+    <img width="400" height="700" src="https://user-images.githubusercontent.com/80872528/127105690-9d018204-443a-44ec-8a5e-bf9ff7c64ec8.png">
   </p>
 
 * Isaac Sim과 unity simulation 연결
@@ -321,6 +321,17 @@ terminal 2 - $ rviz
       
       ex) target : "camera_viewer/DepthViewer/depth" ==> camera_viewer 노드의 DepthViewer의 depth proto로 보낸다 
       
+      <p align="center">
+        <img width="700" height="500" src="https://user-images.githubusercontent.com/80872528/127318219-f714a308-9e3d-4afc-bf08-f92d247b5b2c.png">
+      </p>
+      
+      * Viewer 여는 방법 
+
+        1. application, simulation 실행 후 http://localhost:3000/ 에 들어간다.        
+        2. 좌측 Channels에서 multisensor_unity3d > camera_viewer > ImageViewer 우클릭 > Create a new 2d Renderer > 이름 : ImageViewer - 2d
+        3. 모든 Viewer 동일하게 열면 되고 각 viewer 이름은 다르게 해줘야 한다.
+        
+      
       ```json
       {
         "source": "simulation.interface/output/depth",
@@ -339,6 +350,14 @@ terminal 2 - $ rviz
         "target": "point_cloud/viewer/cloud"
       }
       ```
+      <p align="center">
+        <img width="700" height="500" src="https://user-images.githubusercontent.com/80872528/127318521-6dffafeb-2de3-43da-a7e4-8c69215af48b.png">
+      </p>
+      
+      * 3D Viewer 여는 방법
+        
+        point_cloud 우클릭 후 Create a new 3d Renderer
+      
       
       Simulation의 depth frame을 pointcloud로 만들어주고 viewr로 전송
       
@@ -359,11 +378,103 @@ terminal 2 - $ rviz
       
       Simulation의 rgb, depth image를 ros converter로 전송하면 ros converter가 자동으로 publish
 
-      각 카메라의 rgb frame, depth frame 모두 ros topic이 다르기 때문에 ros converters 내에서도 componet 이름을 다르게 해줘야 한다.
+      각 카메라의 rgb frame, depth frame 모두 ros topic이 다르므로 ros converters 내에서도 componet 이름을 다르게 해줘야 한다. 
+      
+      ex) ImageToRos, ImageToRos2, DepthToRos, DepthToRos2
+      
+      Config에서 각 component 상세 구성을 해주게 되는데 이 때 하나의 componet 당 하나의 topic name을 가지기 때문이다.
+      
+      
       
     * Config
+    
+      camera_viewer 1, 2에서 ImageViewer와 DepthViewer의 parameter를 각자 구성해준다. 
+      
+      ```json
+      "camera_viewer": {
+      "ImageViewer": {
+        "target_fps": 20.0,
+        "reduce_scale": 4
+      },
+      "DepthViewer": {
+        "colormap": [
+          [ 128, 0, 0 ],
+          [ 255, 0, 0 ],
+          [ 255, 255, 0 ],
+          [ 0, 255, 255 ],
+          [ 0, 0, 255 ],
+          [ 0, 0, 128 ]
+        ],
+        "min_visualization_depth": 0.0,
+        "max_visualization_depth": 20.0,
+        "target_fps": 20,
+        "reduce_scale": 4
+      }
+      }
+      ```
+      
+      behavior_bridge와 ros_node를 구성해줘야 rosnode를 만들어 publish가 가능해진다.
+      
+      ```json
+      "behavior_bridge": {
+      "tick_period": "30Hz",
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname ros_node)",
+          "$(fullname ros_converters)"
+        ]
+      }
+      },
+
+      "ros_node": {
+        "RosNode": {
+          "tick_period": "30Hz"
+        }
+      }
+      ```
+      
+      ros_converters에서 channel_name(topic)을 중복되지 않게 구성해준다.
+      
+      ```json
+      "ros_converters": {
+        "ImageToRos": {
+          "ros_node": "$(fullname ros_node)",
+          "channel_name": "/camera_rect/image_rect/color"
+        },
+        "DepthToRos": {
+          "ros_node": "$(fullname ros_node)",
+          "channel_name": "/camera_rect/image_rect/depth"
+        },
+        "CameraIntrinsicsToRos_color": {
+          "ros_node": "$(fullname ros_node)",
+          "channel_name": "/camera_rect/camera_info/color"
+        },
+        "ImageToRos2": {
+          "ros_node": "$(fullname ros_node)",
+          "channel_name": "/camera_rect/image_rect/color2"
+        },
+        "DepthToRos2": {
+          "ros_node": "$(fullname ros_node)",
+          "channel_name": "/camera_rect/image_rect/depth2"
+        },
+        "CameraIntrinsicsToRos_depth": {
+          "ros_node": "$(fullname ros_node)",
+          "channel_name": "/camera_rect/camera_info/depth"
+        }
+      }
+    
+      ```
+      
+      기타 API 설명 - https://docs.nvidia.com/isaac/archive/2020.1/doc/doc/component_api.html
 
 
 
+## 기타 참고 예제
+
+ros bridge - https://docs.nvidia.com/isaac/isaac/packages/ros_bridge/doc/ros_bridge.html
+
+creating new project - https://docs.nvidia.com/isaac/isaac/doc/simulation/unity3d.html#creating-a-unity-project-with-isaac-sim
+
+opencv edge detection - https://docs.nvidia.com/isaac/isaac/doc/tutorials/building_apps.html 
 
 
