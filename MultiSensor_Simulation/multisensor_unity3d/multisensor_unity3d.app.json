@@ -1,0 +1,294 @@
+{
+  "name": "multisensor_unity3d",
+  "modules": [
+    "rgbd_processing",
+    "sight",
+    "viewers",
+    "ros_bridge",
+    "behavior_tree"
+  ],
+  "graph": {
+    "nodes": [      
+      {
+        "name": "simulation",
+        "subgraph": "packages/navsim/apps/navsim_navigation.subgraph.json"
+      },      
+      { 
+        "name": "camera_viewer",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ImageViewer",
+            "type": "isaac::viewers::ImageViewer"
+          },
+          {
+            "name": "DepthViewer",
+            "type": "isaac::viewers::DepthCameraViewer"
+          }          
+        ]
+      },
+      { 
+        "name": "camera_viewer2",
+        "components": [
+          {
+            "name": "ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ImageViewer",
+            "type": "isaac::viewers::ImageViewer"
+          },
+          {
+            "name": "DepthViewer",
+            "type": "isaac::viewers::DepthCameraViewer"
+          }          
+        ]
+      },
+      {
+        "name": "point_cloud",
+        "components": [
+          {
+            "name": "message_ledger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "depth_to_pointcloud",
+            "type": "isaac::rgbd_processing::DepthImageToPointCloud"
+          },
+          {
+            "name": "viewer",
+            "type": "isaac::viewers::PointCloudViewer"
+          }
+        ]
+      },
+      {
+        "name": "behavior_bridge",
+        "components": [
+          {
+            "name": "NodeGroup",
+            "type": "isaac::behavior_tree::NodeGroup"
+          },
+          {
+            "name": "MemorySequenceBehavior",
+            "type": "isaac::behavior_tree::MemorySequenceBehavior"
+          }
+        ]
+      },
+      {
+        "name": "ros_node",
+        "components": [
+          {
+            "name": "RosNode",
+            "type": "isaac::ros_bridge::RosNode"
+          },
+          {
+            "name": "TimeSynchronizer",
+            "type": "isaac::alice::TimeSynchronizer"
+          }
+        ],
+        "disable_automatic_start": true
+      },
+      {
+        "name": "ros_converters",
+        "components": [
+          {
+            "name": "MessageLedger",
+            "type": "isaac::alice::MessageLedger"
+          },
+          {
+            "name": "ImageToRos",
+            "type": "isaac::ros_bridge::ImageToRos"
+          },
+          {
+            "name": "DepthToRos",
+            "type": "isaac::ros_bridge::DepthToRos"
+          },
+          {
+            "name": "CameraIntrinsicsToRos_color",
+            "type": "isaac::ros_bridge::CameraIntrinsicsToRos"
+          },
+          {
+            "name": "ImageToRos2",
+            "type": "isaac::ros_bridge::ImageToRos"
+          },
+          {
+            "name": "DepthToRos2",
+            "type": "isaac::ros_bridge::DepthToRos"
+          },
+          {
+            "name": "CameraIntrinsicsToRos_depth",
+            "type": "isaac::ros_bridge::CameraIntrinsicsToRos"
+          }
+        ],
+        "disable_automatic_start": true
+      }
+    ],
+
+    "edges": [
+      {
+        "source": "simulation.interface/output/depth",
+        "target": "camera_viewer/DepthViewer/depth"
+      },
+      {
+        "source": "simulation.interface/output/depth_intrinsics",
+        "target": "camera_viewer/DepthViewer/intrinsics"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "camera_viewer/ImageViewer/image"
+      },  
+
+      {
+        "source": "simulation.interface/output/depth2",
+        "target": "camera_viewer2/DepthViewer/depth"
+      },
+      {
+        "source": "simulation.interface/output/depth_intrinsics",
+        "target": "camera_viewer2/DepthViewer/intrinsics"
+      },
+      {
+        "source": "simulation.interface/output/color2",
+        "target": "camera_viewer2/ImageViewer/image"
+      },
+
+      {
+        "source": "simulation.interface/output/depth",
+        "target": "point_cloud/depth_to_pointcloud/depth"
+      },
+      {
+        "source": "simulation.interface/output/depth_intrinsics",
+        "target": "point_cloud/depth_to_pointcloud/intrinsics"
+      },
+      {
+        "source": "simulation.interface/output/color",
+        "target": "point_cloud/depth_to_pointcloud/color"
+      },
+      {
+        "source": "point_cloud/depth_to_pointcloud/cloud",
+        "target": "point_cloud/viewer/cloud"
+      },
+
+      {
+        "source": "simulation.interface/output/color",
+        "target": "ros_converters/ImageToRos/proto"
+      },
+      {
+        "source": "simulation.interface/output/depth",
+        "target": "ros_converters/DepthToRos/proto"
+      },
+      {
+        "source": "simulation.interface/output/intrinsics",
+        "target": "ros_converters/CameraIntrinsicsToRos_color/proto"
+      },
+      {
+        "source": "simulation.interface/output/depth_intrinsics",
+        "target": "ros_converters/CameraIntrinsicsToRos_depth/proto"
+      },
+      {
+        "source": "simulation.interface/output/color2",
+        "target": "ros_converters/ImageToRos2/proto"
+      },
+      {
+        "source": "simulation.interface/output/depth2",
+        "target": "ros_converters/DepthToRos2/proto"
+      }
+
+
+    ]
+  },
+  "config": {    
+    "camera_viewer": {
+      "ImageViewer": {
+        "target_fps": 20.0,
+        "reduce_scale": 4
+      },
+      "DepthViewer": {
+        "colormap": [
+          [ 128, 0, 0 ],
+          [ 255, 0, 0 ],
+          [ 255, 255, 0 ],
+          [ 0, 255, 255 ],
+          [ 0, 0, 255 ],
+          [ 0, 0, 128 ]
+        ],
+        "min_visualization_depth": 0.0,
+        "max_visualization_depth": 20.0,
+        "target_fps": 20,
+        "reduce_scale": 4
+      }
+    },
+
+    "camera_viewer2": {
+      "ImageViewer": {
+        "target_fps": 20.0,
+        "reduce_scale": 4
+      },
+      "DepthViewer": {
+        "colormap": [
+          [ 128, 0, 0 ],
+          [ 255, 0, 0 ],
+          [ 255, 255, 0 ],
+          [ 0, 255, 255 ],
+          [ 0, 0, 255 ],
+          [ 0, 0, 128 ]
+        ],
+        "min_visualization_depth": 0.0,
+        "max_visualization_depth": 20.0,
+        "target_fps": 20,
+        "reduce_scale": 4
+      }
+    },
+
+    "point_cloud": {
+      "depth_to_pointcloud": {
+        "use_color": true
+      }
+    },
+
+    "behavior_bridge": {
+      "tick_period": "30Hz",
+      "NodeGroup": {
+        "node_names": [
+          "$(fullname ros_node)",
+          "$(fullname ros_converters)"
+        ]
+      }
+    },
+
+    "ros_node": {
+      "RosNode": {
+        "tick_period": "30Hz"
+      }
+    },
+
+    "ros_converters": {
+      "ImageToRos": {
+        "ros_node": "$(fullname ros_node)",
+        "channel_name": "/camera_rect/image_rect/color"
+      },
+      "DepthToRos": {
+        "ros_node": "$(fullname ros_node)",
+        "channel_name": "/camera_rect/image_rect/depth"
+      },
+      "CameraIntrinsicsToRos_color": {
+        "ros_node": "$(fullname ros_node)",
+        "channel_name": "/camera_rect/camera_info/color"
+      },
+      "ImageToRos2": {
+        "ros_node": "$(fullname ros_node)",
+        "channel_name": "/camera_rect/image_rect/color2"
+      },
+      "DepthToRos2": {
+        "ros_node": "$(fullname ros_node)",
+        "channel_name": "/camera_rect/image_rect/depth2"
+      },
+      "CameraIntrinsicsToRos_depth": {
+        "ros_node": "$(fullname ros_node)",
+        "channel_name": "/camera_rect/camera_info/depth"
+      }
+    }
+  }
+}
