@@ -85,6 +85,26 @@
   
   * /isaac_sim_unity3d/isaac/sdk/apps/tutorials/에 MultiSensor_Simulation/multisensor_unity3d (업로드 된 폴더) 다운로드
   * /isaac_sim_unity3d/isaac/sdk/packages/ros_bridge/components에 MultiSensor_Simulation/DepthToRos.cpp, hpp (업로드 된 파일) 다운로드
+  * /isaac_sim_unity3d/isaac/sdk/packages/ros_bridge/components/BUILD 에 아래 코드 추가 
+  
+    <pre>
+    isaac_component(
+    name = "depth_to_ros",
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":proto_to_ros_converter",
+        "//packages/ros_bridge/gems",
+        "//third_party:ros",
+    ],
+    )
+    </pre>
+    
+  * /isaac_sim_unity3d/isaac/sdk/packages/ros_bridge/BUILD 에 아래 코드 추가
+    
+    <pre>
+    "//packages/ros_bridge/components:depth_to_ros",
+    </pre>
 
 
 ## Scene, Project 구성
