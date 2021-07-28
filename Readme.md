@@ -1,61 +1,98 @@
-## IsaacSim projects (Used Unity 3D)
+## IsaacSim projects (Simulator : Unity 3D)
 
-  * Publishing rgb, depth image with ROS(Using multi realsense camera)
+  * Publishing rgb, depth image with ROS(Using multi realsense D435i)
 
-## IsaacSim with multicamera (publish rgb, depth image) 
+## Publishing RGBD image with ROS(Using multi realsense D435i)
 
-* Scene : Laboratory
+* Scene : 연구실
 * IsaacSim + ROS(melodic)
-* After installing n Realsense cameras to obtain rgb, depth frames from each camera and publishing with different topics
-
+* Unity 3D Scene에 n개 Realsense D435i 센서 부착 후 RGB, Depth image들을 각자 다른 topic으로 publish
 
 <p align="center">
   <img width="800" height="500" src="https://user-images.githubusercontent.com/80872528/127097749-ae2e3e4c-4f88-43bc-81ac-258a55e747f0.png">
 </p>
 
-## Installing IsaacSim
+## 개발 환경 구성
 
-* [Environment](https://docs.nvidia.com/isaac/isaac/doc/setup.html)
-  * Ubuntu 18.04
-  * Cuda 10.2 
-  * RTX 2080 Ti
-  * NVIDIA graphics card drivers version 440
-  * Unity 2019.03.0f6 (must be used)
-  * Python virtual environment (python 3.6)
- 
-* Installing Isaac SDK and IsaacSim Unity 3D (https://docs.nvidia.com/isaac/isaac/doc/setup.html)
+* 개발 환경
+  * Ubuntu 18.04 (필수)
+  * RTX 2080 Ti 사용 - Cuda 10.2 (필수), cuDNN 8.0.3
+  * NVIDIA graphics card drivers version 440 (version 440 이상 필요)  
+  * Bazel 3.1.0 (필수)
+  * Isaac SDK(2020.2), IsaacSim Unity3D (2020.2)
+  * Python virtual environment (python 3.6, requirements.txt 내 명시된 모듈) 
+  * Unity 2019.03.0f6 (필수, 다른 버전 사용시 오류 발생했음)
+  * ROS Melodic
+  
+  
+* [개발 환경 상세 설명](https://docs.nvidia.com/isaac/isaac/doc/setup.html)
 
-* Isaac path should be made like this. -> ./isaac_sim_unity3d/isaac/sdk/...
+  * GPU는 compute capability 6.1 이상 필요하며 Readme 작성일 기준(2021.07.28) [Cuda 10.2](https://developer.nvidia.com/cuda-10.2-download-archive) 설치 요구
 
-  isaac(Unzip isaac-sdk and rename to isaac) must be in isaac_sim_unity3d.
-  
+  * [cuDNN 8.0.3 설치](https://developer.nvidia.com/rdp/cudnn-archive)
 
-## Installing Unity 2019.03.0f6
+  * [Nvidia gpu driver 440 설치](https://docs.nvidia.com/isaac/isaac/doc/setup.html#nvidia-gpu-drivernvidia-gpu-driver) 
 
-  Download UnityHub.AppImage, then run the following commands
-  
-  <pre>
-  ./UnityHub.AppImage unityhub://2019.3.0f6/27ab2135bccf
-  </pre>
-  
-  The link above can be copied from [https://unity3d.com/get-unity/download/archive] after right-clicking the version you want and clicking "copy link"
-  
-  You can execute play mode & editor mode (https://docs.nvidia.com/isaac/isaac/doc/simulation/unity3d.html)
-  
-## Setting python virtual environment (python 3.6)
+    <pre>
+    bob@desktop:~/isaac/sdk$ sudo add-apt-repository ppa:graphics-drivers/ppa
+    bob@desktop:~/isaac/sdk$ sudo apt-get update
+    bob@desktop:~/isaac/sdk$ sudo apt-get install nvidia-driver-440
+    </pre>
 
-  First, Install Anacdona
+  * Isaac SDK, IsaacSim Unity 3D 설치
+
+    1. https://developer.nvidia.com/isaac/downloads 들어가서 하단 ARCHIVE (Click to toggle open/close) 클릭
+    2. ISAAC 2020.2의 SDK, SIM(Unity) 다운로드
+    3. 둘 다 unzip 후 isaac_sim_unity3d-20201123-197b4c38 -> isaac_sim_unity3d로, isaac-sdk-20201201-427971df2 -> isaac 으로 이름 수정
+    4. isaac_sim_unity3d 안에 isaac 폴더 삽입
+
+  * [Bazel 3.1.0 설치](https://docs.bazel.build/versions/main/install-ubuntu.html)
+
+    3.1.0 버전으로 수정 후 설치 주의
+    
+  * Python virtual environment 구성 (Anaconda 이용했으며 동일하게 세팅시 별도 설치 필요)
+    
+    1. [Anaconda 설치](https://www.anaconda.com/products/individual#Downloads)
+    2. requirements.txt(업로드된 파일) 다운로드
+    3. 가상 환경 세팅
+       <pre>
+       $ conda create -n isaac_test python=3.6
+       $ conda activate isaac_test
+       $ pip install requirements.txt
+       </pre>
+       
+    * requirements.txt는 필요 모듈과 각 버전 열거한 리스트
+    * 앞으로 bazel run 등을 이용하여 application 실행시 isaac_test 가상환경 안에서 진행할 것
+
+  * [Dependencies 설치](https://docs.nvidia.com/isaac/isaac/doc/setup.html#installing-dependencies-on-the-desktop)
+    
+    <pre>
+    bob@desktop:~/isaac/engine/$ ./engine/build/scripts/install_dependencies.sh
+    </pre>
+
+  * Unity 2019.03.0f6 설치 (Unity Editor 모드)
+
+    1. [UnityHub.AppImage](https://forum.unity.com/threads/unity-hub-v-1-3-2-is-now-available.594139/) 다운로드
+    2. 2019.3.0f6 버전 설치
+       <pre>
+       ./UnityHub.AppImage unityhub://2019.3.0f6/27ab2135bccf
+       </pre>
+    
+    * 위와 같은 버전 링크는 [https://unity3d.com/get-unity/download/archive]에서 원하는 버전의 "Unity Hub" 우클릭 후 "copy link address" 클릭하여 얻을 수 있음
+    
+* 기타 준비 사항
   
-  <pre>
-  $ conda create -n isaac_test python=3.6
-  $ conda activate isaac_test
-  $ pip install requirements.txt
-  </pre>
-  
-  You can download requirements.txt from my github code directory.
-  
-  Run command such as [bazel run~] in virtual environment. IsaacSim needs specific python version and modules.
-  
+  * MultiSensor_Simulation/multisensor_unity3d 다운로드 후 
+
+
+
+
+
+
+
+
+    
+    
 ## Other preparations
 
 * Download multisensor_unity3d directory from my github and add in /isaac_sim_unity3d/isaac/sdk/apps/tutorials/
