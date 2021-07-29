@@ -488,6 +488,25 @@ terminal 2 - $ rviz
       기타 API 설명 - https://docs.nvidia.com/isaac/archive/2020.1/doc/doc/component_api.html
 
 
+## RGB, Depth Sensor 추가하는 방법
+
+- Unity 3D 수정
+
+  * Unity3D의 Sensor를 복사하여 원하는 위치로 이동 후 Inspector에서 color camera, depth camera script의 channel name을 color 3,...으로 바꾼다.
+
+- multisensor_unity3d.app.json 수정
+
+  * Isaac sight가 추가적으로 필요할 경우, node 파트에서 camera_viewer 3,... 추가해준다
+  * ros_converters 노드에 ImageToRos3, DepthToRos3, ... 등의 component들을 추가해준다.
+  
+  * edges 부분에서는 위에서 추가된 노드와 simulation에서 추가된 센서의 channel에 맞게 source와 target을 추가해 써준다.
+  * simulation의 "simulation.interface/output/color" 채널의 color 부분에 unity에서 추가한 channel name을 써주며 depth 채널에서도 마찬가지로 써준다.
+  * sight와 연결시에도 동일하게 적용해준다.
+  
+  * Config에서도 sight 추가할 경우 camera_viewer3, ... 를 만들어주고 ros_converters에도 ImageToRos3, DepthToRos3,... 하나씩 추가해준다. 
+  * config - ros converters의 channel_name은 ros topic이므로 중복되지 않게 추가해준다.
+
+
 
 ## 기타 참고 예제
 
