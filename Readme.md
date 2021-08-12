@@ -1,6 +1,7 @@
 ## IsaacSim projects (Simulator : Unity 3D)
 
   * Publishing rgb, depth image with ROS(Using multi realsense D435i)
+  * Pose control with ROS tf message
 
 ## Publishing RGBD image with ROS(Using multi realsense D435i)
 
@@ -12,7 +13,7 @@
   <img width="800" height="500" src="https://user-images.githubusercontent.com/80872528/127097749-ae2e3e4c-4f88-43bc-81ac-258a55e747f0.png">
 </p>
 
-## 개발 환경 구성
+### 개발 환경 구성
 
 * 개발 환경
   * Ubuntu 18.04 (필수)
@@ -107,7 +108,7 @@
     </pre>
 
 
-## Scene, Project 구성
+### Scene, Project 구성
 
 <pre>
 ~/isaac_sim_unity3d$ mkdir projects/test
@@ -130,7 +131,7 @@
       <img width="600" height="500" src="https://user-images.githubusercontent.com/80872528/127104398-7bef679c-a172-41ca-99a3-d9367e362da6.png">
     </p>
 
-## 실행
+### 실행
 
 1. Unity3D에서 Scene 열고 시뮬레이션 시작
 2. Applicaiton 실행
@@ -150,7 +151,7 @@ terminal 2 - $ rviz
 
 
 
-## Sensor description (Unity 3D)
+### Sensor description (Unity 3D)
 (카메라 기존 2개보다 추가시 참고)
 
 * 카메라 가져오기
@@ -169,12 +170,12 @@ terminal 2 - $ rviz
 
 * Isaac Sim과 unity simulation 연결
 
-## [Scene description](https://docs.nvidia.com/isaac/isaac/doc/simulation/unity3d.html) (Unity 3D)
+### [Scene description](https://docs.nvidia.com/isaac/isaac/doc/simulation/unity3d.html) (Unity 3D)
 (새로 project, scene 구성할 때 참고)
 
 * isaac sdk와 Unity를 연결하려면 [isaac.alice, isaac.minisight를 scene에 드래그](https://docs.nvidia.com/isaac/isaac/doc/simulation/unity3d.html#add-carter-and-isaac-applications) (NVIDIA IsaacSim for Unity3D(Core) > Prefabs에 위치)
 
-## Application description - multisensor_unity3d.app.json (Isaac)
+### Application description - multisensor_unity3d.app.json (Isaac)
    * Isaac sdk에서는 json 형식을 이용해 전체 연결 시스템을 구성하며 그래프로 구성해야 한다. 크게 node, edge, Config로 이루어져 있다. 
    * [일반적으로 Unity Simulation과 Sight(Viewer) 및 기타 동작들을 연결시켜주는데 이용된다](https://docs.nvidia.com/isaac/isaac/doc/tutorials/building_apps.html?highlight=edge%20detection#processing-input-from-simulation) 
    * multisensor_unity3d.app.json 파일은 Isaac sdk로서 Unity simulation과 ROS를 이어주는 중간 매개체 역할을 해준다. 
@@ -488,7 +489,7 @@ terminal 2 - $ rviz
       기타 API 설명 - https://docs.nvidia.com/isaac/archive/2020.1/doc/doc/component_api.html
 
 
-## RGB, Depth Sensor 추가하는 방법
+### RGB, Depth Sensor 추가하는 방법
 
 - Unity 3D 수정
 
@@ -514,7 +515,7 @@ terminal 2 - $ rviz
 
 
 
-## 기타 참고 예제
+### 기타 참고 예제
 
 ros bridge - https://docs.nvidia.com/isaac/isaac/packages/ros_bridge/doc/ros_bridge.html
 
@@ -523,3 +524,96 @@ creating new project - https://docs.nvidia.com/isaac/isaac/doc/simulation/unity3
 opencv edge detection - https://docs.nvidia.com/isaac/isaac/doc/tutorials/building_apps.html 
 
 
+
+## Pose control with ROS tf message
+
+### 시뮬레이터 환경 구성
+
+  * [개발 환경 구성](https://github.com/SungjoonCho/IsaacSim_Simulation#user-content-%EA%B0%9C%EB%B0%9C-%ED%99%98%EA%B2%BD-%EA%B5%AC%EC%84%B1)
+  * [Scene,Project 구성](https://github.com/SungjoonCho/IsaacSim_Simulation#user-content-scene-project-%EA%B5%AC%EC%84%B1)
+
+### Unity3D - Pose control 할 대상에 script 붙이기
+  
+  
+  <p align="center">
+    <img width="1000" height="500" src="https://user-images.githubusercontent.com/80872528/129162341-2e353914-3e71-45e7-91db-44abf0a4c467.png">
+  </p>
+
+  1. chair_ros로 이름 변경
+  2. NVIDIA IsaacSim for Unity3D (Core) > Scripts > Runtime > Actuator 에서 Teleport.cs 드래그하여 inspector에 script 붙이기
+  3. Teleport(Script) > Objects > Size 1로 수정 후 Element 0 을 chair_ros 선택
+    
+### ros_bridge package에 RosToRigid 추가
+
+  1. 업로드된 PoseControl/RosToRigid 디렉토리 내부 RosToRigid.cpp, RosToRigid.hpp 다운로드 후 isaac/sdk/packages/ros_bridge/components/ 로 이동
+  2. /isaac/sdk/packages/ros_bridge/components/BUILD 파일 하단에 아래 코드 추가
+  
+     ```json
+     <pre>
+      isaac_component(
+           name = "ros_to_rigid",
+           tags = ["manual"],
+           visibility = ["//visibility:public"],
+           deps = [
+               ":ros_node",
+               "//packages/ros_bridge/gems",
+               "//third_party:ros",
+           ],
+       )
+     </pre>
+
+### posecontrol.app.json 
+ 
+  * PoseControl/posecontrol 디렉토리 다운로드 후 /isaac/sdk/apps/tutorials 로 이동
+  
+### talker (ROS message publisher)
+
+  * dd
+
+### 실행
+
+  * terminal 1
+    <pre>
+      ~/tf_talker$ rosrun tf_talker talker
+    </pre>
+    
+  * terminal 2
+    <pre>
+      (isaac_test) ~/isaac_sim_unity3d/isaac/sdk$ bazel run //apps/tutorials/posecontrol:posecontrol
+    </pre>
+    
+  * Unity 3D scene 시뮬레이션 실행
+
+    <p align="center">
+      <img width="1000" height="500" src="https://user-images.githubusercontent.com/80872528/129161873-3bccad63-ef3c-4eee-b7d8-47e342905490.png">
+    </p>
+        
+        
+### Description
+
+   * 전체 흐름
+     
+     talker에서 ROS tf publish -> RosToRigid에서 subscribe 후 pose 정보를 RigidBody3Group proto 형식에 맞게 저장, simulator에 publish(ROS X) 
+   
+     -> chair_ros script에서 pose 반영하여 teleport
+
+   * RosToRigid.cpp, hpp
+
+     RosToRigid는 RosToPose와 RigidBody3GroupGenerator 병합하기 위해 새로 cutomizing 하였으며,
+     
+     ROS로 받아온 정보 중 필요한 정보만 Rigid 객체 형식에 맞춰 저장 후 proto로 만드는 것이 목적
+   
+     1. ROS /tf topic으로 메시지 subscribe하여(tf2_ros::TransformListener에서 topic 확인 가능) rotation, translation을 Pose3d에 저장
+     2. RigidBody3Group에 pose 대입, 그 외 velocity, acceleration은 0으로 초기화
+     3. posecontrol.app.json의 config > RosToRigid에서 body_name 및 기타 parameter (ex. velocity, acceleration) 설정 가능(값들은 RigidBody3Group에 저장됨)
+     4. 생성된 bodies proto는 시뮬레이션의 chair_ros teleport channel로 이동
+
+     * talker에서 pose data publish 할 때 target frame, source frame은 map, base_link로 초기화 해놓았고, RosToRigid에서도 동일한 frame 쓰일 수 있게 hpp에서 미리 초기화 
+     
+     
+   * posecontrol.app.json
+
+     1. Edge의 RosToRigid 결과물인 bodies proto를 시뮬레이션의 chair_ros teleport channel과 연결
+     2. Config의 RosToRigid에서 ROS 연결 위한 parameter와 Pose control 할 대상 이름 설정
+
+     
