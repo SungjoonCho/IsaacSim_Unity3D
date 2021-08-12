@@ -599,16 +599,15 @@ opencv edge detection - https://docs.nvidia.com/isaac/isaac/doc/tutorials/buildi
 
    * RosToRigid.cpp, hpp
 
-     RosToRigid는 RosToPose와 RigidBody3GroupGenerator 병합하기 위해 새로 cutomizing 하였으며,
-     
-     ROS로 받아온 정보 중 필요한 정보만 Rigid 객체 형식에 맞춰 저장 후 proto로 만드는 것이 목적
+     RosToRigid는 RosToPose와 RigidBody3GroupGenerator 병합하기 위해 새로 cutomizing 하였으며, ROS로 받아온 정보 중 필요한 정보만 Rigid 객체 형식에 맞춰 저장 후 proto로 만드는 것이 목적
    
      1. ROS /tf topic으로 메시지 subscribe하여(tf2_ros::TransformListener에서 topic 확인 가능) rotation, translation을 Pose3d에 저장
      2. RigidBody3Group에 pose 대입, 그 외 velocity, acceleration은 0으로 초기화
      3. posecontrol.app.json의 config > RosToRigid에서 body_name 및 기타 parameter (ex. velocity, acceleration) 설정 가능(값들은 RigidBody3Group에 저장됨)
      4. 생성된 bodies proto는 시뮬레이션의 chair_ros teleport channel로 이동
 
-     * talker에서 pose data publish 할 때 target frame, source frame은 map, base_link로 초기화 해놓았고, RosToRigid에서도 동일한 frame 쓰일 수 있게 hpp에서 미리 초기화 
+     
+     talker에서 pose data publish 할 때 target frame, source frame은 map, base_link로 초기화 해놓았고, RosToRigid에서도 동일한 frame 쓰일 수 있게 hpp에서 미리 초기화 
      
      
    * posecontrol.app.json
