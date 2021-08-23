@@ -568,7 +568,7 @@ opencv edge detection - https://docs.nvidia.com/isaac/isaac/doc/tutorials/buildi
   
 ### talker (ROS message publisher)
 
-  * publish tf message[https://github.com/SungjoonCho/ros_tf_talker] 
+  * [publish tf message](https://github.com/SungjoonCho/ros_tf_talker)
 
 ### 실행
 
