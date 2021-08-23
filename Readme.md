@@ -568,13 +568,13 @@ opencv edge detection - https://docs.nvidia.com/isaac/isaac/doc/tutorials/buildi
   
 ### talker (ROS message publisher)
 
-  * talker/talker.cpp, talker/CMakeLists.txt 다운로드 후 rosrun 하여 tf 정보 ROS publish
+  * publish tf message[https://github.com/SungjoonCho/ros_tf_talker] 
 
 ### 실행
 
   * terminal 1
     <pre>
-      ~/tf_talker$ rosrun tf_talker talker
+      ~/talker$ rosrun roscpp_tutorials talker
     </pre>
     
   * terminal 2
